@@ -31,7 +31,7 @@
 #include "usb_core.h"
 #include "usbd_cdc_vcp.h"
 #include "usb_io.h"
-#elif defined(STM32F7) || defined(STM32H7)
+#elif defined(STM32F7) || defined(STM32H7) || defined(STM32G4)
 #include "vcp_hal/usbd_cdc_interface.h"
 #include "usb_io.h"
 USBD_HandleTypeDef USBD_Device;
@@ -224,7 +224,7 @@ void usbVcpInitHardware(void)
 
     // Register callback for DTR state changes
     CDC_SetCtrlLineStateCb(cdcCtrlLineStateCallback, NULL);
-#elif defined(STM32F7) || defined(STM32H7)
+#elif defined(STM32F7) || defined(STM32H7) || defined(STM32G4)
     usbGenerateDisconnectPulse();
 
     IOInit(IOGetByTag(IO_TAG(PA11)), OWNER_USB, RESOURCE_INPUT, 0);

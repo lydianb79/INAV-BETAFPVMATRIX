@@ -129,7 +129,7 @@ static bool spiBusTransferRegister(spi_type * instance, uint8_t reg, uint8_t * r
 static bool spiBusTransferRegister(SPI_TypeDef * instance, uint8_t reg, uint8_t * rxData, const uint8_t * txData, int len)
 #endif
 {
-#if defined(STM32H7) || defined(STM32F7)
+#if defined(STM32H7) || defined(STM32F7) || defined(STM32G4)
     return spiTransferRegister(instance, reg, rxData, txData, len);
 #else
     spiTransferByte(instance, reg);

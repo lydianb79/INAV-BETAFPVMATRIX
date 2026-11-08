@@ -15,7 +15,9 @@ typedef enum {
     RCC_AHB3,
     RCC_APB3,
     RCC_AHB4,
-    RCC_APB4
+    RCC_APB4,
+    RCC_APB11,      // STM32G4 APB1ENR1
+    RCC_APB12       // STM32G4 APB1ENR2
 } rcc_reg;
  
 #define RCC_ENCODE(reg, mask) (((reg) << 5) | LOG2_32BIT(mask))
@@ -43,6 +45,14 @@ typedef enum {
 #define RCC_APB1H(periph) RCC_ENCODE(RCC_APB1H, RCC_APB1HENR_ ## periph ## EN)
 #define RCC_APB3(periph) RCC_ENCODE(RCC_APB3, RCC_APB3ENR_ ## periph ## EN)
 #define RCC_APB4(periph) RCC_ENCODE(RCC_APB4, RCC_APB4ENR_ ## periph ## EN)
+#endif
+
+#ifdef STM32G4
+#undef RCC_APB1
+#define RCC_AHB2(periph) RCC_ENCODE(RCC_AHB2, RCC_AHB2ENR_ ## periph ## EN)
+#define RCC_AHB3(periph) RCC_ENCODE(RCC_AHB3, RCC_AHB3ENR_ ## periph ## EN)
+#define RCC_APB11(periph) RCC_ENCODE(RCC_APB11, RCC_APB1ENR1_ ## periph ## EN)
+#define RCC_APB12(periph) RCC_ENCODE(RCC_APB12, RCC_APB1ENR2_ ## periph ## EN)
 #endif
 
 void RCC_ClockCmd(rccPeriphTag_t periphTag, FunctionalState NewState);

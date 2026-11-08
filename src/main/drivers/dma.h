@@ -56,6 +56,26 @@ typedef void (*dmaCallbackHandlerFuncPtr)(DMA_t channelDescriptor);
         dmamux_channel_type	     * dmaMuxref;  //dmamux flag  
     } dmaChannelDescriptor_t;
 
+#elif defined(STM32G4)
+    // G4 DMA ISR/IFCR layout: 4 bits per channel (GIF, TCIF, HTIF, TEIF)
+    #define DMA_IT_TCIF                         ((uint32_t)0x00000002)
+    #define DMA_IT_HTIF                         ((uint32_t)0x00000004)
+    #define DMA_IT_TEIF                         ((uint32_t)0x00000008)
+    #define DMA_IT_DMEIF                        ((uint32_t)0x00000000) // no direct mode error on G4
+    #define DMA_IT_FEIF                         ((uint32_t)0x00000000) // no FIFO on G4
+
+    typedef struct dmaChannelDescriptor_s {
+        dmaTag_t                    tag;
+        DMA_TypeDef*                dma;
+        DMA_Channel_TypeDef*        ref;
+        dmaCallbackHandlerFuncPtr   irqHandlerCallback;
+        uint32_t                    flagsShift;
+        IRQn_Type                   irqNumber;
+        uint32_t                    userParam;
+        resourceOwner_e             owner;
+        uint8_t                     resourceIndex;
+    } dmaChannelDescriptor_t;
+
 #else
     #define DMA_IT_TCIF                         ((uint32_t)0x00000020)
     #define DMA_IT_HTIF                         ((uint32_t)0x00000010)
@@ -106,6 +126,30 @@ typedef void (*dmaCallbackHandlerFuncPtr)(DMA_t channelDescriptor);
 
 
 DMA_t dmaGetByRef(const DMA_Stream_TypeDef * ref);
+
+#elif defined(STM32G4)
+
+// c = channel number (1..8). The DMA tag "stream" field holds c - 1 so it stays 0-based
+// like the stream index on F4/F7/H7 (see timer_def_stm32g4xx.h)
+#define DEFINE_DMA_CHANNEL(d, c, f) { \
+                                        .tag = DMA_TAG(d, (c) - 1, 0), \
+                                        .dma = DMA##d, \
+                                        .ref = DMA##d##_Channel##c, \
+                                        .irqHandlerCallback = NULL, \
+                                        .flagsShift = f, \
+                                        .irqNumber = DMA##d##_Channel##c##_IRQn, \
+                                        .userParam = 0 \
+                                    }
+
+#define DEFINE_DMA_IRQ_HANDLER(d, c, i) void DMA ## d ## _Channel ## c ## _IRQHandler(void) {\
+                                                                if (dmaDescriptors[i].irqHandlerCallback)\
+                                                                    dmaDescriptors[i].irqHandlerCallback(&dmaDescriptors[i]);\
+                                                            }
+
+#define DMA_CLEAR_FLAG(d, flag) ((d)->dma->IFCR = ((flag) << (d)->flagsShift))
+#define DMA_GET_FLAG_STATUS(d, flag) ((d)->dma->ISR & ((flag) << (d)->flagsShift))
+
+DMA_t dmaGetByRef(const DMA_Channel_TypeDef * ref);
 
 #elif defined(AT32F43x)
 

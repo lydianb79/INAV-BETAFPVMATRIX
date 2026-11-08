@@ -24,7 +24,7 @@ extiChannelRec_t extiChannelRecs[16];
 static const uint8_t extiGroups[16] = { 0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6 };
 static uint8_t extiGroupPriority[EXTI_IRQ_GROUPS];
 
-#if defined(STM32F4) || defined(STM32F7) || defined(STM32H7)
+#if defined(STM32F4) || defined(STM32F7) || defined(STM32H7) || defined(STM32G4)
 static const uint8_t extiGroupIRQn[EXTI_IRQ_GROUPS] = {
     EXTI0_IRQn,
     EXTI1_IRQn,
@@ -52,6 +52,9 @@ static const uint8_t extiGroupIRQn[EXTI_IRQ_GROUPS] = {
 #if defined(STM32H7)
 #define EXTI_REG_IMR (EXTI_D1->IMR1)
 #define EXTI_REG_PR  (EXTI_D1->PR1)
+#elif defined(STM32G4)
+#define EXTI_REG_IMR (EXTI->IMR1)
+#define EXTI_REG_PR  (EXTI->PR1)
 #elif defined(AT32F43x)  
 // Interrupt enable register & interrupt status register
 #define EXTI_REG_IMR (EXINT->inten)
@@ -67,6 +70,9 @@ void EXTIInit(void)
 #if defined(STM32F4)
     /* Enable SYSCFG clock otherwise the EXTI irq handlers are not called */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+#elif defined(STM32G4)
+    /* SYSCFG holds the EXTICR port selection registers */
+    __HAL_RCC_SYSCFG_CLK_ENABLE();
 #elif defined(AT32F43x)  
     crm_periph_clock_enable(CRM_SCFG_PERIPH_CLOCK, TRUE);
 #endif
@@ -79,7 +85,7 @@ void EXTIHandlerInit(extiCallbackRec_t *self, extiHandlerCallback *fn)
     self->fn = fn;
 }
 
-#if defined(STM32F7) || defined(STM32H7)
+#if defined(STM32F7) || defined(STM32H7) || defined(STM32G4)
 void EXTIConfig(IO_t io, extiCallbackRec_t *cb, int irqPriority, ioConfig_t config)
 {
     (void)config;
@@ -199,7 +205,7 @@ void EXTIRelease(IO_t io)
 
 void EXTIEnable(IO_t io, bool enable)
 {
-#if defined(STM32F4) || defined(STM32F7) || defined(STM32H7)|| defined(AT32F43x)
+#if defined(STM32F4) || defined(STM32F7) || defined(STM32H7) || defined(STM32G4) || defined(AT32F43x)
     uint32_t extiLine = IO_EXTI_Line(io);
     if (!extiLine)
         return;
@@ -248,7 +254,7 @@ _EXTI_IRQ_HANDLER(EXINT15_10_IRQHandler);
 #else
 _EXTI_IRQ_HANDLER(EXTI0_IRQHandler);
 _EXTI_IRQ_HANDLER(EXTI1_IRQHandler);
-#if defined(STM32F7) || defined(STM32H7)
+#if defined(STM32F7) || defined(STM32H7) || defined(STM32G4)
 _EXTI_IRQ_HANDLER(EXTI2_IRQHandler);
 #elif defined(STM32F4) || defined(AT32F43x)  
 _EXTI_IRQ_HANDLER(EXTI2_TS_IRQHandler);

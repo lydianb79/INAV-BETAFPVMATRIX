@@ -39,7 +39,16 @@ extern uint32_t timerClock(TIM_TypeDef *tim);
 const uint16_t lookupDMASourceTable[] = { TIM_DMA_CC1, TIM_DMA_CC2, TIM_DMA_CC3, TIM_DMA_CC4 };
 const uint8_t lookupTIMChannelTable[] = { TIM_CHANNEL_1, TIM_CHANNEL_2, TIM_CHANNEL_3, TIM_CHANNEL_4 };
 
+#if defined(STM32G4)
+// G4 DMA is channel based (channel 1..8); the DMA tag "stream" field holds channel - 1.
+// Map the stream style LL calls used below onto the channel API.
+static const uint32_t lookupDMALLStreamTable[] = { LL_DMA_CHANNEL_1, LL_DMA_CHANNEL_2, LL_DMA_CHANNEL_3, LL_DMA_CHANNEL_4, LL_DMA_CHANNEL_5, LL_DMA_CHANNEL_6, LL_DMA_CHANNEL_7, LL_DMA_CHANNEL_8 };
+#define LL_DMA_EnableStream     LL_DMA_EnableChannel
+#define LL_DMA_DisableStream    LL_DMA_DisableChannel
+#define LL_DMA_IsEnabledStream  LL_DMA_IsEnabledChannel
+#else
 static const uint32_t lookupDMALLStreamTable[] = { LL_DMA_STREAM_0, LL_DMA_STREAM_1, LL_DMA_STREAM_2, LL_DMA_STREAM_3, LL_DMA_STREAM_4, LL_DMA_STREAM_5, LL_DMA_STREAM_6, LL_DMA_STREAM_7 };
+#endif
 
 #if !(defined(STM32H7) || defined(STM32G4))
 static const uint32_t lookupDMALLChannelTable[] = { LL_DMA_CHANNEL_0, LL_DMA_CHANNEL_1, LL_DMA_CHANNEL_2, LL_DMA_CHANNEL_3, LL_DMA_CHANNEL_4, LL_DMA_CHANNEL_5, LL_DMA_CHANNEL_6, LL_DMA_CHANNEL_7 };
@@ -417,10 +426,12 @@ bool impl_timerPWMConfigChannelDMA(TCH_t * tch, void * dmaBuffer, uint8_t dmaBuf
     init.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
     init.Mode = LL_DMA_MODE_NORMAL;
     init.Priority = LL_DMA_PRIORITY_HIGH;
+#if !defined(STM32G4)
     init.FIFOMode = LL_DMA_FIFOMODE_ENABLE;
     init.FIFOThreshold = LL_DMA_FIFOTHRESHOLD_FULL;
     init.MemBurst = LL_DMA_MBURST_SINGLE;
     init.PeriphBurst = LL_DMA_PBURST_SINGLE;
+#endif
 
     dmaInit(tch->dma, OWNER_TIMER, 0);
     dmaSetHandler(tch->dma, impl_timerDMA_IRQHandler, NVIC_PRIO_TIMER_DMA, (uint32_t)tch);
@@ -499,10 +510,12 @@ bool impl_timerPWMConfigDMABurst(burstDmaTimer_t *burstDmaTimer, TCH_t * tch, vo
         init.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
         init.Mode = LL_DMA_MODE_NORMAL;
         init.Priority = LL_DMA_PRIORITY_HIGH;
+#if !defined(STM32G4)
         init.FIFOMode = LL_DMA_FIFOMODE_ENABLE;
         init.FIFOThreshold = LL_DMA_FIFOTHRESHOLD_FULL;
         init.MemBurst = LL_DMA_MBURST_SINGLE;
         init.PeriphBurst = LL_DMA_PBURST_SINGLE;
+#endif
 
         dmaInit(tch->dma, OWNER_TIMER, 0);
         dmaSetHandler(tch->dma, impl_timerDMA_IRQHandler, NVIC_PRIO_TIMER_DMA, (uint32_t)tch);

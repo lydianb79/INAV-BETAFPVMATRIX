@@ -24,6 +24,8 @@
 #define ADC_TAG_MAP_COUNT 16
 #elif defined(STM32H7)
 #define ADC_TAG_MAP_COUNT 28
+#elif defined(STM32G4)
+#define ADC_TAG_MAP_COUNT 23
 #else
 #define ADC_TAG_MAP_COUNT 10
 #endif
@@ -41,6 +43,9 @@ typedef enum ADCDevice {
     ADCDEV_2,
     ADCDEV_3,
     ADCDEV_MAX = ADCDEV_3,
+#elif defined(STM32G4)
+    ADCDEV_2,
+    ADCDEV_MAX = ADCDEV_2,
 #else
     ADCDEV_MAX = ADCDEV_1,
 #endif
@@ -63,13 +68,16 @@ typedef struct adcDevice_s {
 #if defined(STM32F4) || defined(STM32F7) || defined(STM32H7)
     DMA_Stream_TypeDef* DMAy_Streamx;
     uint32_t channel;
+#elif defined(STM32G4)
+    DMA_Channel_TypeDef* DMAy_Channelx;
+    uint32_t channel;           // DMAMUX request
 #elif defined(AT32F43x) 
     dma_channel_type* DMAy_Channelx;
     uint32_t dmaMuxid; // dmamux request type
 #else
     DMA_Channel_TypeDef* DMAy_Channelx;
 #endif
-#if defined(STM32F7) || defined(STM32H7)
+#if defined(STM32F7) || defined(STM32H7) || defined(STM32G4)
     ADC_HandleTypeDef ADCHandle;
     DMA_HandleTypeDef DmaHandle;
 #endif

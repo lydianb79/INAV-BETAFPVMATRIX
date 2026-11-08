@@ -1,5 +1,39 @@
 # INAV - navigation capable flight controller
 
+# This fork: BETAFPV Matrix 1S (STM32G4) support
+
+> **Experimental, not yet tested on hardware.** Bench-test with **propellers removed** before flying.
+
+This tree is upstream INAV (master `b006087`, 1 Nov 2026) plus:
+
+* **STM32G4 MCU support** (STM32G473/G474, Cortex-M4F at 168 MHz), which upstream INAV does not have.
+  It follows INAV's H7 port and Betaflight's G4 code. All changes to shared files are guarded by
+  `defined(STM32G4)`, so F4, F7, H7 and AT32 builds are unchanged.
+* **ICM42622P** gyro detection, handled like the ICM42688P.
+* Two new targets for the BETAFPV Matrix 1S Brushless Flight Controller:
+
+| Target | Board | Pinout taken from Betaflight target |
+|---|---|---|
+| `BETAFPVMATRIX_3IN1` | Matrix 1S 3IN1 (HD, no analog OSD) | `BETAFPVG473` |
+| `BETAFPVMATRIX_4IN1` | Matrix 1S 4IN1 (analog OSD) | `BETAFPVG473_V2` |
+
+The two boards have different pinouts: flash the file that matches your board.
+
+Build them like any INAV target:
+
+```sh
+mkdir build && cd build
+cmake ..
+make BETAFPVMATRIX_3IN1    # -> inav_<version>_BETAFPVMATRIX_3IN1.hex
+make BETAFPVMATRIX_4IN1    # -> inav_<version>_BETAFPVMATRIX_4IN1.hex
+```
+
+Flash the `.hex` in DFU mode with INAV Configurator (Firmware Flasher, *Load Firmware [Local]*,
+*Full chip erase* on), or with STM32CubeProgrammer if the Configurator does not handle the G4 DFU device.
+
+Pin map, bench-test checklist and known gaps (no USB mass storage, SD card, DroneCAN or INAV
+bootloader on G4 yet) are in [docs/MATRIX1S_STM32G4_PORT.md](docs/MATRIX1S_STM32G4_PORT.md).
+
 # INAV Documentation
 > For documentation on using INAV, see our new docs site at [inavflight.github.io](https://inavflight.github.io/)
 
@@ -44,7 +78,7 @@ Download the latest INAV flight controller firmware. Flash it to your flight con
 
 ## Features
 
-* Runs on the most popular F4, AT32, F7 and H7 flight controllers
+* Runs on the most popular F4, AT32, F7 and H7 flight controllers (and, in this fork, STM32G4)
 * On Screen Display (OSD) - both character and pixel style
 * DJI OSD integration: all elements, system messages and warnings
 * Outstanding performance out of the box

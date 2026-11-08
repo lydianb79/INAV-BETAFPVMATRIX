@@ -72,8 +72,19 @@
 // The map follows the clock the SPI runs from. On F7 SPI1 and SPI4 are on APB2 and SPI2 and
 // SPI3 on APB1, at half the rate; on H7 pll1_q (SPI1-3) and D2PCLK1 (SPI4) are the same
 // frequency, so every SPI takes the map of SPI1
-#if defined(USE_SPI_DEVICE_1) || defined(USE_SPI_DEVICE_4) || \
-    (defined(STM32H7) && (defined(USE_SPI_DEVICE_2) || defined(USE_SPI_DEVICE_3)))
+#if defined(STM32G4)
+// G4: every SPI runs from an undivided 168 MHz PCLK (APB1 for SPI2/3, APB2 for SPI1/4)
+static const uint32_t spiDivisorMapG4[] = {
+    LL_SPI_BAUDRATEPRESCALER_DIV256,    // SPI_CLOCK_INITIALIZATON      656.25 KBits/s
+    LL_SPI_BAUDRATEPRESCALER_DIV128,    // SPI_CLOCK_SLOW               1.3125 MBits/s
+    LL_SPI_BAUDRATEPRESCALER_DIV16,     // SPI_CLOCK_STANDARD           10.5 MBits/s
+    LL_SPI_BAUDRATEPRESCALER_DIV8,      // SPI_CLOCK_FAST               21.0 MBits/s
+    LL_SPI_BAUDRATEPRESCALER_DIV8       // SPI_CLOCK_ULTRAFAST          21.0 MBits/s (ICM42688 max is 24 MHz)
+};
+#endif
+
+#if !defined(STM32G4) && (defined(USE_SPI_DEVICE_1) || defined(USE_SPI_DEVICE_4) || \
+    (defined(STM32H7) && (defined(USE_SPI_DEVICE_2) || defined(USE_SPI_DEVICE_3))))
 static const uint32_t spiDivisorMapFast[] = {
     LL_SPI_BAUDRATEPRESCALER_DIV256,    // SPI_CLOCK_INITIALIZATON      421.875 KBits/s
     LL_SPI_BAUDRATEPRESCALER_DIV128,    // SPI_CLOCK_SLOW               843.75 KBits/s
@@ -83,7 +94,7 @@ static const uint32_t spiDivisorMapFast[] = {
 };
 #endif
 
-#if !defined(STM32H7) && (defined(USE_SPI_DEVICE_2) || defined(USE_SPI_DEVICE_3))
+#if !defined(STM32H7) && !defined(STM32G4) && (defined(USE_SPI_DEVICE_2) || defined(USE_SPI_DEVICE_3))
 static const uint32_t spiDivisorMapSlow[] = {
     LL_SPI_BAUDRATEPRESCALER_DIV256,    // SPI_CLOCK_INITIALIZATON      210.937 KBits/s
     LL_SPI_BAUDRATEPRESCALER_DIV64,     // SPI_CLOCK_SLOW               843.75 KBits/s
@@ -172,6 +183,83 @@ static spiDevice_t spiHardwareMap[SPIDEV_COUNT] = {
     { .dev = NULL }     // No SPI4
 #endif
 };
+#elif defined(STM32G4)
+#include "bus_spi_stm32g4xx.h"
+
+#ifdef USE_SPI_DEVICE_1
+#ifndef SPI1_SCK_AF
+#define SPI1_SCK_AF    SPI_PIN_AF_HELPER(1, SPI1_SCK_PIN)
+#endif
+#ifndef SPI1_MISO_AF
+#define SPI1_MISO_AF   SPI_PIN_AF_HELPER(1, SPI1_MISO_PIN)
+#endif
+#ifndef SPI1_MOSI_AF
+#define SPI1_MOSI_AF   SPI_PIN_AF_HELPER(1, SPI1_MOSI_PIN)
+#endif
+#endif
+
+#ifdef USE_SPI_DEVICE_2
+#ifndef SPI2_SCK_AF
+#define SPI2_SCK_AF    SPI_PIN_AF_HELPER(2, SPI2_SCK_PIN)
+#endif
+#ifndef SPI2_MISO_AF
+#define SPI2_MISO_AF   SPI_PIN_AF_HELPER(2, SPI2_MISO_PIN)
+#endif
+#ifndef SPI2_MOSI_AF
+#define SPI2_MOSI_AF   SPI_PIN_AF_HELPER(2, SPI2_MOSI_PIN)
+#endif
+#endif
+
+#ifdef USE_SPI_DEVICE_3
+#ifndef SPI3_SCK_AF
+#define SPI3_SCK_AF    SPI_PIN_AF_HELPER(3, SPI3_SCK_PIN)
+#endif
+#ifndef SPI3_MISO_AF
+#define SPI3_MISO_AF   SPI_PIN_AF_HELPER(3, SPI3_MISO_PIN)
+#endif
+#ifndef SPI3_MOSI_AF
+#define SPI3_MOSI_AF   SPI_PIN_AF_HELPER(3, SPI3_MOSI_PIN)
+#endif
+#endif
+
+#ifdef USE_SPI_DEVICE_4
+#ifndef SPI4_SCK_AF
+#define SPI4_SCK_AF    SPI_PIN_AF_HELPER(4, SPI4_SCK_PIN)
+#endif
+#ifndef SPI4_MISO_AF
+#define SPI4_MISO_AF   SPI_PIN_AF_HELPER(4, SPI4_MISO_PIN)
+#endif
+#ifndef SPI4_MOSI_AF
+#define SPI4_MOSI_AF   SPI_PIN_AF_HELPER(4, SPI4_MOSI_PIN)
+#endif
+#endif
+
+static spiDevice_t spiHardwareMap[] = {
+#ifdef USE_SPI_DEVICE_1
+    { .dev = SPI1, .nss = IO_TAG(SPI1_NSS_PIN), .sck = IO_TAG(SPI1_SCK_PIN), .miso = IO_TAG(SPI1_MISO_PIN), .mosi = IO_TAG(SPI1_MOSI_PIN), .rcc = RCC_APB2(SPI1), .sckAF = SPI1_SCK_AF, .misoAF = SPI1_MISO_AF, .mosiAF = SPI1_MOSI_AF, .divisorMap = spiDivisorMapG4 },
+#else
+    { .dev = NULL },    // No SPI1
+#endif
+
+#ifdef USE_SPI_DEVICE_2
+    { .dev = SPI2, .nss = IO_TAG(SPI2_NSS_PIN), .sck = IO_TAG(SPI2_SCK_PIN), .miso = IO_TAG(SPI2_MISO_PIN), .mosi = IO_TAG(SPI2_MOSI_PIN), .rcc = RCC_APB11(SPI2), .sckAF = SPI2_SCK_AF, .misoAF = SPI2_MISO_AF, .mosiAF = SPI2_MOSI_AF, .divisorMap = spiDivisorMapG4 },
+#else
+    { .dev = NULL },    // No SPI2
+#endif
+
+#ifdef USE_SPI_DEVICE_3
+    { .dev = SPI3, .nss = IO_TAG(SPI3_NSS_PIN), .sck = IO_TAG(SPI3_SCK_PIN), .miso = IO_TAG(SPI3_MISO_PIN), .mosi = IO_TAG(SPI3_MOSI_PIN), .rcc = RCC_APB11(SPI3), .sckAF = SPI3_SCK_AF, .misoAF = SPI3_MISO_AF, .mosiAF = SPI3_MOSI_AF, .divisorMap = spiDivisorMapG4 },
+#else
+    { .dev = NULL },    // No SPI3
+#endif
+
+#ifdef USE_SPI_DEVICE_4
+    { .dev = SPI4, .nss = IO_TAG(SPI4_NSS_PIN), .sck = IO_TAG(SPI4_SCK_PIN), .miso = IO_TAG(SPI4_MISO_PIN), .mosi = IO_TAG(SPI4_MOSI_PIN), .rcc = RCC_APB2(SPI4), .sckAF = SPI4_SCK_AF, .misoAF = SPI4_MISO_AF, .mosiAF = SPI4_MOSI_AF, .divisorMap = spiDivisorMapG4 }
+#else
+    { .dev = NULL }     // No SPI4
+#endif
+};
+
 #elif defined(STM32F7)
 #include "bus_spi_stm32f7xx.h"
 

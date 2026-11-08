@@ -110,7 +110,9 @@ static int8_t CDC_Itf_Init(void);
 static int8_t CDC_Itf_DeInit(void);
 static int8_t CDC_Itf_Control(uint8_t cmd, uint8_t* pbuf, uint16_t length);
 static int8_t CDC_Itf_Receive(uint8_t* pbuf, uint32_t *Len);
+#if !defined(STM32G4)
 static int8_t CDC_Itf_Transmit(uint8_t *pbuf, uint32_t *Len, uint8_t epnum);
+#endif
 
 
 static void TIM_Config(void);
@@ -122,7 +124,10 @@ USBD_CDC_ItfTypeDef USBD_CDC_fops =
   CDC_Itf_DeInit,
   CDC_Itf_Control,
   CDC_Itf_Receive,
+#if !defined(STM32G4)
+  // The G4 CDC class has no transmit-complete callback; this one is a no-op anyway
   CDC_Itf_Transmit
+#endif
 };
 
 
@@ -356,6 +361,7 @@ static int8_t CDC_Itf_Receive(uint8_t* Buf, uint32_t *Len)
   * @param  Len: Number of data received (in bytes)
   * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
   */
+#if !defined(STM32G4)
 static int8_t CDC_Itf_Transmit(uint8_t *Buf, uint32_t *Len, uint8_t epnum)
 {
   UNUSED(Buf);
@@ -364,6 +370,7 @@ static int8_t CDC_Itf_Transmit(uint8_t *Buf, uint32_t *Len, uint8_t epnum)
 
   return (0);
 }
+#endif
 
 /**
   * @brief  TIM_Config: Configure TIMusb timer
@@ -382,7 +389,12 @@ static void TIM_Config(void)
        + Counter direction = Up
   */
   TimHandle.Init.Period = (CDC_POLLING_INTERVAL*1000) - 1;
+#if defined(STM32G4)
+  // G4 runs APB1 undivided, so timer kernel clock == SystemCoreClock
+  TimHandle.Init.Prescaler = (SystemCoreClock / (1000000)) - 1;
+#else
   TimHandle.Init.Prescaler = (SystemCoreClock / 2 / (1000000)) - 1;
+#endif
   TimHandle.Init.ClockDivision = 0;
   TimHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
   if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)
@@ -483,7 +495,12 @@ uint32_t CDC_Send_FreeBytes(void)
 
 uint32_t CDC_Send_DATA(const uint8_t *ptrBuffer, uint32_t sendLength)
 {
+#if defined(STM32G4)
+    // The G4 USB middleware (shared with Betaflight) keeps per-class data pointers
+    USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)USBD_Device.pCDC_ClassData;
+#else
     USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)USBD_Device.pClassData;
+#endif
 
     // The CDC class is not registered in MSC mode; guard against a NULL
     // class data pointer.

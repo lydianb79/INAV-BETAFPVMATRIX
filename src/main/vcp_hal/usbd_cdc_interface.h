@@ -57,8 +57,14 @@
 
 /* Definition for TIMx clock resources */
 #define TIMusb                             TIM7
+#if defined(STM32G4)
+// On G4 TIM7 shares its interrupt vector with DAC
+#define TIMx_IRQn                        TIM7_DAC_IRQn
+#define TIMx_IRQHandler                  TIM7_DAC_IRQHandler
+#else
 #define TIMx_IRQn                        TIM7_IRQn
 #define TIMx_IRQHandler                  TIM7_IRQHandler
+#endif
 #define TIMx_CLK_ENABLE                  __HAL_RCC_TIM7_CLK_ENABLE
 
 /* Periodically, the state of the buffer "UserTxBuffer" is checked.

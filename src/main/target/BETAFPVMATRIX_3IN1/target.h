@@ -1,0 +1,150 @@
+/*
+ * This file is part of INAV.
+ *
+ * INAV is free software. You can redistribute this software
+ * and/or modify this software under the terms of the
+ * GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * INAV is distributed in the hope that they will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this software.
+ *
+ * If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * BETAFPV Matrix 1S Brushless Flight Controller (3IN1, HD)
+ *   STM32G473CEU6 @ 168 MHz, ICM42688P or BMI270 (shipping from Jan 2026),
+ *   16 MB SPI flash, onboard serial ELRS 2.4 GHz receiver on UART3,
+ *   12A BB51 Bluejay 4in1 ESC, SH1.0-6 pin HD VTX port. No analog OSD.
+ *
+ * Pinout from the Betaflight unified target BETAFPVG473 (MANUFACTURER_ID BEFH),
+ * which BETAFPV specifies for this board.
+ */
+
+#pragma once
+
+#define TARGET_BOARD_IDENTIFIER "M1S3"
+#define USBD_PRODUCT_STRING     "BETAFPVMATRIX_3IN1"
+
+// Betaflight target sets SYSTEM_HSE_MHZ 0: no crystal, run from the internal 16 MHz RC
+#define USE_HSI_CLOCK
+
+#define LED0                    PC15
+#define LED1                    PC14
+
+#define BEEPER                  PA8
+#define BEEPER_INVERTED
+
+// *************** SPI1 Gyro & ACC *****************
+#define USE_SPI
+#define USE_SPI_DEVICE_1
+#define SPI1_SCK_PIN            PA5
+#define SPI1_MISO_PIN           PA6
+#define SPI1_MOSI_PIN           PA7
+
+#define GYRO_1_CS_PIN           PA4
+#define GYRO_1_EXTI_PIN         PC4
+
+// ICM42688P (driven by the INAV ICM42605/426xx driver)
+#define USE_IMU_ICM42605
+#define IMU_ICM42605_ALIGN      CW180_DEG
+#define ICM42605_SPI_BUS        BUS_SPI1
+#define ICM42605_CS_PIN         GYRO_1_CS_PIN
+
+// BMI270 (boards shipped from January 2026)
+#define USE_IMU_BMI270
+#define IMU_BMI270_ALIGN        CW180_DEG
+#define BMI270_SPI_BUS          BUS_SPI1
+#define BMI270_CS_PIN           GYRO_1_CS_PIN
+
+// *************** SPI3 Blackbox flash *************
+#define USE_SPI_DEVICE_3
+#define SPI3_SCK_PIN            PB3
+#define SPI3_MISO_PIN           PB4
+#define SPI3_MOSI_PIN           PB5
+
+#define USE_FLASHFS
+#define USE_FLASH_M25P16
+#define M25P16_SPI_BUS          BUS_SPI3
+#define M25P16_CS_PIN           PB9
+#define ENABLE_BLACKBOX_LOGGING_ON_SPIFLASH_BY_DEFAULT
+
+// *************** I2C (baro / mag pads) ***********
+#define USE_I2C
+#define USE_I2C_DEVICE_1
+#define I2C1_SCL                PA15
+#define I2C1_SDA                PB7
+
+#define USE_BARO
+#define BARO_I2C_BUS            BUS_I2C1
+#define USE_BARO_BMP280
+#define USE_BARO_DPS310
+
+#define USE_MAG
+#define MAG_I2C_BUS             BUS_I2C1
+#define USE_MAG_ALL
+
+// *************** UART ****************************
+#define USE_VCP
+
+#define USE_UART1
+#define UART1_TX_PIN            PA9
+#define UART1_RX_PIN            PA10
+
+#define USE_UART2
+#define UART2_TX_PIN            PA2
+#define UART2_RX_PIN            PA3
+
+// Onboard ELRS 2.4 GHz receiver
+#define USE_UART3
+#define UART3_TX_PIN            PB10
+#define UART3_RX_PIN            PB11
+
+#define USE_UART4
+#define UART4_TX_PIN            PC10
+#define UART4_RX_PIN            PC11
+
+#define SERIAL_PORT_COUNT       5   // VCP + UART1..4
+
+#define DEFAULT_RX_TYPE         RX_TYPE_SERIAL
+#define SERIALRX_PROVIDER       SERIALRX_CRSF
+#define SERIALRX_UART           SERIAL_PORT_USART3
+
+// *************** ADC *****************************
+#define USE_ADC
+#define ADC_INSTANCE                ADC1
+#define ADC_CHANNEL_1_PIN           PA0
+#define ADC_CHANNEL_2_PIN           PA1
+#define VBAT_ADC_CHANNEL            ADC_CHN_1
+#define CURRENT_METER_ADC_CHANNEL   ADC_CHN_2
+
+#define CURRENT_METER_SCALE         750
+
+// *************** LED strip ***********************
+#define USE_LED_STRIP
+#define WS2811_PIN                  PB2
+
+// *************** Defaults ************************
+#define USE_TARGET_CONFIG
+
+#define DEFAULT_FEATURES            (FEATURE_TX_PROF_SEL | FEATURE_VBAT | FEATURE_CURRENT_METER | FEATURE_TELEMETRY | FEATURE_OSD | FEATURE_BLACKBOX)
+#define DEFAULT_VOLTAGE_METER_SOURCE    VOLTAGE_METER_ADC
+#define DEFAULT_CURRENT_METER_SOURCE    CURRENT_METER_ADC
+
+#define USE_DSHOT
+#define USE_ESC_SENSOR
+#define USE_SERIAL_4WAY_BLHELI_INTERFACE
+
+#define TARGET_IO_PORTA         0xffff
+#define TARGET_IO_PORTB         0xffff
+#define TARGET_IO_PORTC         0xffff
+#define TARGET_IO_PORTF         (BIT(0) | BIT(1))
+
+#define MAX_PWM_OUTPUT_PORTS    4

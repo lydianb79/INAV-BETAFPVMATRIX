@@ -29,7 +29,7 @@
 #include "drivers/system.h"
 #include "drivers/time.h"
 
-#if defined(STM32F4) || defined(STM32F7) || defined(STM32H7)||defined(AT32F43x)
+#if defined(STM32F4) || defined(STM32F7) || defined(STM32H7) || defined(STM32G4) || defined(AT32F43x)
 // See "RM CoreSight Architecture Specification"
 // B2.3.10  "LSR and LAR, Software Lock Status Register and Software Lock Access Register"
 // "E1.2.11  LAR, Lock Access Register"
@@ -66,7 +66,7 @@ void cycleCounterInit(void)
         DWT->LAR = DWT_LAR_UNLOCK_VALUE;
     #elif defined(AT32F43x)
       ITM->LAR = DWT_LAR_UNLOCK_VALUE;
-    #elif defined(STM32F4)
+    #elif defined(STM32F4) || defined(STM32G4)
         volatile uint32_t *DWTLAR = (uint32_t *)(DWT_BASE + 0x0FB0);
         *(DWTLAR) = DWT_LAR_UNLOCK_VALUE;
     #endif
@@ -130,6 +130,15 @@ void checkForBootLoaderRequest(void)
     __HAL_RCC_SYSCFG_CLK_ENABLE();
 
     // Jump to bootloader
+    volatile isrVector_t *bootloaderVector = (isrVector_t *)systemBootloaderAddress();
+    __set_MSP(bootloaderVector->stackEnd);
+    bootloaderVector->resetHandler();
+        while (1);
+    #elif defined(STM32G4)
+    // G4 system bootloader expects system memory to be mapped at 0x00000000
+    __HAL_RCC_SYSCFG_CLK_ENABLE();
+    __HAL_SYSCFG_REMAPMEMORY_SYSTEMFLASH();
+
     volatile isrVector_t *bootloaderVector = (isrVector_t *)systemBootloaderAddress();
     __set_MSP(bootloaderVector->stackEnd);
     bootloaderVector->resetHandler();

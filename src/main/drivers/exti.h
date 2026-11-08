@@ -35,7 +35,7 @@ struct extiCallbackRec_s {
 void EXTIInit(void);
 
 void EXTIHandlerInit(extiCallbackRec_t *cb, extiHandlerCallback *fn);
-#if defined(STM32F7) || defined(STM32H7)
+#if defined(STM32F7) || defined(STM32H7) || defined(STM32G4)
 void EXTIConfig(IO_t io, extiCallbackRec_t *cb, int irqPriority, ioConfig_t config);
 #elif defined(AT32F43x)
 void EXTIConfig(IO_t io, extiCallbackRec_t *cb, int irqPriority, exint_polarity_config_type trigger);
