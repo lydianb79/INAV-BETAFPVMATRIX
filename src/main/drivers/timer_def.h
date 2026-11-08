@@ -86,6 +86,14 @@
 
 #define BTCH_TIM15_CH1N BTCH_TIM15_CH1
 #define BTCH_TIM16_CH1N BTCH_TIM16_CH1
+
+#if defined(STM32G4)
+// STM32G4 adds complementary outputs on channel 4 of the advanced timers
+#define BTCH_TIM1_CH4N BTCH_TIM1_CH4
+#define BTCH_TIM8_CH4N BTCH_TIM8_CH4
+#define BTCH_TIM20_CH4N BTCH_TIM20_CH4
+#define BTCH_TIM17_CH1N BTCH_TIM17_CH1
+#endif
 #endif
 
 // Default output flags
@@ -105,6 +113,8 @@
     #include "timer_def_stm32f7xx.h"
 #elif defined(STM32H7)
     #include "timer_def_stm32h7xx.h"
+#elif defined(STM32G4)
+    #include "timer_def_stm32g4xx.h"
 #elif defined(AT32F43x)
     #include "timer_def_at32f43x.h"
 #elif defined(SITL_BUILD)

@@ -31,7 +31,7 @@
 
 typedef uint16_t captureCompare_t;        // 16 bit on both 103 and 303, just register access must be 32bit sometimes (use timCCR_t)
 
-#if defined(STM32F4) || defined(STM32F7) || defined(STM32H7)|| defined(AT32F43x)
+#if defined(STM32F4) || defined(STM32F7) || defined(STM32H7) || defined(STM32G4) || defined(AT32F43x)
 typedef uint32_t timCCR_t;
 typedef uint32_t timCCER_t;
 typedef uint32_t timSR_t;
@@ -56,6 +56,9 @@ typedef uint32_t timCNT_t;
 #define HARDWARE_TIMER_DEFINITION_COUNT 14
 #elif defined(STM32H7)
 #define HARDWARE_TIMER_DEFINITION_COUNT 14
+#elif defined(STM32G4)
+#define HARDWARE_TIMER_DEFINITION_COUNT 12
+#define TIMER_INDEX(n)                  ((n) < 9 ? (n) - 1 : ((n) < 20 ? (n) - 7 : 11)) // TIM1..TIM8, TIM15..TIM17, TIM20
 #elif defined(AT32F43x)
 #define HARDWARE_TIMER_DEFINITION_COUNT 15
 #elif defined(SITL_BUILD)

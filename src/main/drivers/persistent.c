@@ -89,12 +89,16 @@ void persistentObjectRTCEnable(void)
 #if defined(__HAL_RCC_RTC_CLK_ENABLE)
     // For those MCUs with RTCAPBEN bit in RCC clock enable register, turn it on.
     __HAL_RCC_RTC_CLK_ENABLE(); // Enable RTC module
+#elif defined(__HAL_RCC_RTCAPB_CLK_ENABLE)
+    // STM32G4: backup registers live in TAMP, clocked by RTCAPBEN
+    __HAL_RCC_RTCAPB_CLK_ENABLE();
 #endif
 
     // We don't need a clock source for RTC itself. Skip it.
 
     __HAL_RTC_WRITEPROTECTION_ENABLE(&rtcHandle);  // Reset sequence
     __HAL_RTC_WRITEPROTECTION_DISABLE(&rtcHandle); // Apply sequence
+    (void)rtcHandle; // the G4 macros access RTC directly
 }
 
 #else

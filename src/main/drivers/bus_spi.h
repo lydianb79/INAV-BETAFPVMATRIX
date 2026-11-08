@@ -26,7 +26,7 @@
 #define SPI_IO_AF_SCK_CFG       IO_CONFIG(GPIO_Mode_AF,  GPIO_Speed_50MHz, GPIO_OType_PP, GPIO_PuPd_DOWN)
 #define SPI_IO_AF_MISO_CFG      IO_CONFIG(GPIO_Mode_AF,  GPIO_Speed_50MHz, GPIO_OType_PP, GPIO_PuPd_UP)
 #define SPI_IO_CS_CFG           IO_CONFIG(GPIO_Mode_OUT, GPIO_Speed_50MHz, GPIO_OType_PP, GPIO_PuPd_NOPULL)
-#elif defined(STM32F7) || defined(STM32H7)
+#elif defined(STM32F7) || defined(STM32H7) || defined(STM32G4)
 #define SPI_IO_AF_CFG           IO_CONFIG(GPIO_MODE_AF_PP, GPIO_SPEED_FREQ_VERY_HIGH, GPIO_NOPULL)
 #define SPI_IO_AF_SCK_CFG_HIGH  IO_CONFIG(GPIO_MODE_AF_PP, GPIO_SPEED_FREQ_VERY_HIGH, GPIO_PULLUP)
 #define SPI_IO_AF_SCK_CFG_LOW   IO_CONFIG(GPIO_MODE_AF_PP, GPIO_SPEED_FREQ_VERY_HIGH, GPIO_PULLDOWN)
@@ -61,7 +61,7 @@ typedef enum SPIDevice {
 
 #if defined(STM32F4)
 #define SPIDEV_COUNT 3
-#elif defined(STM32F7) || defined(STM32H7)|| defined(AT32F43x)
+#elif defined(STM32F7) || defined(STM32H7) || defined(STM32G4) || defined(AT32F43x)
 #define SPIDEV_COUNT 4
 #else
 #define SPIDEV_COUNT 4
@@ -82,7 +82,7 @@ typedef struct SPIDevice_s {
     ioTag_t mosi;
     ioTag_t miso;
     rccPeriphTag_t rcc;
-#if defined(STM32F7) || defined(STM32H7) || defined(AT32F43x)
+#if defined(STM32F7) || defined(STM32H7) || defined(STM32G4) || defined(AT32F43x)
     uint8_t sckAF;
     uint8_t misoAF;
     uint8_t mosiAF;
