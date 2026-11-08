@@ -71,6 +71,21 @@ static void i2cUnstick(IO_t scl, IO_t sda);
 #endif
 #endif
 
+#if defined(STM32G4)
+#ifndef I2C1_AF
+#define I2C1_AF GPIO_AF4_I2C1
+#endif
+#ifndef I2C2_AF
+#define I2C2_AF GPIO_AF4_I2C2
+#endif
+#ifndef I2C3_AF
+#define I2C3_AF GPIO_AF8_I2C3
+#endif
+#ifndef I2C4_AF
+#define I2C4_AF GPIO_AF3_I2C4
+#endif
+#endif
+
 static i2cDevice_t i2cHardwareMap[I2CDEV_COUNT] = {
 
 #if defined(STM32F7)
@@ -86,6 +101,16 @@ static i2cDevice_t i2cHardwareMap[I2CDEV_COUNT] = {
     { .dev = I2C3, .scl = IO_TAG(I2C3_SCL), .sda = IO_TAG(I2C3_SDA), .rcc = RCC_APB1L(I2C3), .speed = I2C_SPEED_400KHZ, .ev_irq = I2C3_EV_IRQn, .er_irq = I2C3_ER_IRQn, .af = GPIO_AF4_I2C3 },
 #if defined(USE_I2C_DEVICE_4)
     { .dev = I2C4, .scl = IO_TAG(I2C4_SCL), .sda = IO_TAG(I2C4_SDA), .rcc = RCC_APB4(I2C4), .speed = I2C_SPEED_400KHZ, .ev_irq = I2C4_EV_IRQn, .er_irq = I2C4_ER_IRQn, .af = GPIO_AF4_I2C4 }
+#endif
+#elif defined(STM32G4)
+    // G4 I2C alternate functions depend on the pin; the defaults below cover the common
+    // pins (I2C1: PA13/PA14/PA15/PB7/PB8/PB9, I2C2: PA8/PA9/PC4/PF6, I2C3: PC8/PC9/PC11).
+    // A target can override them with I2Cx_AF.
+    { .dev = I2C1, .scl = IO_TAG(I2C1_SCL), .sda = IO_TAG(I2C1_SDA), .rcc = RCC_APB11(I2C1), .speed = I2C_SPEED_400KHZ, .ev_irq = I2C1_EV_IRQn, .er_irq = I2C1_ER_IRQn, .af = I2C1_AF },
+    { .dev = I2C2, .scl = IO_TAG(I2C2_SCL), .sda = IO_TAG(I2C2_SDA), .rcc = RCC_APB11(I2C2), .speed = I2C_SPEED_400KHZ, .ev_irq = I2C2_EV_IRQn, .er_irq = I2C2_ER_IRQn, .af = I2C2_AF },
+    { .dev = I2C3, .scl = IO_TAG(I2C3_SCL), .sda = IO_TAG(I2C3_SDA), .rcc = RCC_APB11(I2C3), .speed = I2C_SPEED_400KHZ, .ev_irq = I2C3_EV_IRQn, .er_irq = I2C3_ER_IRQn, .af = I2C3_AF },
+#if defined(USE_I2C_DEVICE_4)
+    { .dev = I2C4, .scl = IO_TAG(I2C4_SCL), .sda = IO_TAG(I2C4_SDA), .rcc = RCC_APB12(I2C4), .speed = I2C_SPEED_400KHZ, .ev_irq = I2C4_EV_IRQn, .er_irq = I2C4_ER_IRQn, .af = I2C4_AF }
 #endif
 #endif
 };

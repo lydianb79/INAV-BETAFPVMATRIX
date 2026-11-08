@@ -343,7 +343,12 @@ static void TIM_Config(void)
        + Counter direction = Up
   */
   TimHandle.Init.Period = (CDC_POLLING_INTERVAL*1000) - 1;
+#if defined(STM32G4)
+  // G4 runs APB1 undivided, so timer kernel clock == SystemCoreClock
+  TimHandle.Init.Prescaler = (SystemCoreClock / (1000000)) - 1;
+#else
   TimHandle.Init.Prescaler = (SystemCoreClock / 2 / (1000000)) - 1;
+#endif
   TimHandle.Init.ClockDivision = 0;
   TimHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
   if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)

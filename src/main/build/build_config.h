@@ -45,7 +45,8 @@
 #define FASTRAM                     __attribute__ ((section(".fastram_bss"), aligned(4)))
 #endif
 
-#if defined (STM32F4) || defined (STM32F7)
+#if defined (STM32F4) || defined (STM32F7) || defined (STM32G4)
+// G4: FASTRAM lives in the CCM SRAM like on the F405, so CPU-only state can go there too
 #define EXTENDED_FASTRAM FASTRAM
 #else
 #define EXTENDED_FASTRAM

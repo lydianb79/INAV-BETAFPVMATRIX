@@ -29,6 +29,8 @@
 #define CONFIG_STREAMER_BUFFER_SIZE M25P16_PAGESIZE // Must match flash device page size
 #elif defined(STM32H7)
 #define CONFIG_STREAMER_BUFFER_SIZE (FLASH_NB_32BITWORD_IN_FLASHWORD * 4) // Flash word = 256-bits or 128bits, depending on the mcu
+#elif defined(STM32G4)
+#define CONFIG_STREAMER_BUFFER_SIZE 8   // G4 programs flash in 64-bit double words
 #else
 #define CONFIG_STREAMER_BUFFER_SIZE 4
 #endif

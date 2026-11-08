@@ -1,0 +1,38 @@
+set(STM32G4_USBCORE_DIR "${MAIN_LIB_DIR}/main/STM32G4/Middlewares/ST/STM32_USB_Device_Library/Core")
+set(STM32G4_USBCORE_SRC
+    usbd_core.c
+    usbd_ctlreq.c
+    usbd_ioreq.c
+)
+list(TRANSFORM STM32G4_USBCORE_SRC PREPEND "${STM32G4_USBCORE_DIR}/Src/")
+
+set(STM32G4_USBCDC_DIR "${MAIN_LIB_DIR}/main/STM32G4/Middlewares/ST/STM32_USB_Device_Library/Class/CDC")
+set(STM32G4_USBCDC_SRC
+    usbd_cdc.c
+)
+list(TRANSFORM STM32G4_USBCDC_SRC PREPEND "${STM32G4_USBCDC_DIR}/Src/")
+
+set(STM32G4_USBHID_DIR "${MAIN_LIB_DIR}/main/STM32G4/Middlewares/ST/STM32_USB_Device_Library/Class/HID")
+set(STM32G4_USBHID_SRC
+    usbd_hid.c
+)
+list(TRANSFORM STM32G4_USBHID_SRC PREPEND "${STM32G4_USBHID_DIR}/Src/")
+
+set(STM32G4_USBMSC_DIR "${MAIN_LIB_DIR}/main/STM32G4/Middlewares/ST/STM32_USB_Device_Library/Class/MSC")
+set(STM32G4_USBMSC_SRC
+    usbd_msc.c
+    usbd_msc_bot.c
+    usbd_msc_data.c
+    usbd_msc_scsi.c
+)
+list(TRANSFORM STM32G4_USBMSC_SRC PREPEND "${STM32G4_USBMSC_DIR}/Src/")
+
+set(STM32G4_USB_INCLUDE_DIRS
+    "${STM32G4_USBCORE_DIR}/Inc"
+    "${STM32G4_USBCDC_DIR}/Inc"
+    "${STM32G4_USBHID_DIR}/Inc"
+    "${STM32G4_USBMSC_DIR}/Inc"
+)
+
+list(APPEND STM32G4_USB_SRC ${STM32G4_USBCORE_SRC})
+list(APPEND STM32G4_USB_SRC ${STM32G4_USBCDC_SRC})

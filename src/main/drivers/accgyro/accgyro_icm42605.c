@@ -296,6 +296,10 @@ static bool icm42605DeviceDetect(busDevice_t * dev)
             case ICM42688P_WHO_AM_I_CONST:
                 is42688P = true;
                 return true;
+            case ICM42622P_WHO_AM_I_CONST:
+                // ICM42622P is register compatible with the ICM42688P (as handled in Betaflight)
+                is42688P = true;
+                return true;
 
             default:
                 // Retry detection
