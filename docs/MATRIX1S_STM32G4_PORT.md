@@ -6,7 +6,7 @@
 
 ## What is in this tree
 
-Upstream INAV (`iNavFlight/inav`, master at `b006087`, 1 Nov 2026) has no STM32G4 support.
+Upstream INAV 10.0 (`iNavFlight/inav`, branch `maintenance-10.x` at `21adf6444`) has no STM32G4 support.
 The Matrix 1S boards use an **STM32G473CEU6**, so this tree adds:
 
 1. **STM32G4 platform support** (new MCU family), modelled on INAV's H7 port and

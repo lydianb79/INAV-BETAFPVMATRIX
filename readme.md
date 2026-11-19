@@ -1,35 +1,58 @@
 # INAV - navigation capable flight controller
 
-# This fork: BETAFPV Matrix 1S (STM32G4) support
+# This fork: STM32G4 support and BETAFPV Matrix 1S targets
 
 > **Experimental, not yet tested on hardware.** Bench-test with **propellers removed** before flying.
 
-This tree is upstream INAV (master `b006087`, 1 Nov 2026) plus:
+Upstream INAV does not support STM32G4 microcontrollers. This fork adds them, for three INAV versions:
 
-* **STM32G4 MCU support** (STM32G473/G474, Cortex-M4F at 168 MHz), which upstream INAV does not have.
-  It follows INAV's H7 port and Betaflight's G4 code. All changes to shared files are guarded by
-  `defined(STM32G4)`, so F4, F7, H7 and AT32 builds are unchanged.
+| INAV | Branch | Based on | Firmware download |
+|---|---|---|---|
+| 10.0 | [`master`](https://github.com/lydianb79/INAV-BETAFPVMATRIX/tree/master) | upstream `maintenance-10.x` at `21adf6444` (17 Nov 2026; 10.0.0 not released yet) | [10.0.0 release](https://github.com/lydianb79/INAV-BETAFPVMATRIX/releases/tag/10.0.0-betafpvmatrix) |
+| 9.1 | [`inav-9.x`](https://github.com/lydianb79/INAV-BETAFPVMATRIX/tree/inav-9.x) | upstream tag `9.1.0` | [9.1.0 release](https://github.com/lydianb79/INAV-BETAFPVMATRIX/releases/tag/9.1.0-betafpvmatrix) |
+| 8.0 | [`inav-8.x`](https://github.com/lydianb79/INAV-BETAFPVMATRIX/tree/inav-8.x) | upstream tag `8.0.1` | [8.0.1 release](https://github.com/lydianb79/INAV-BETAFPVMATRIX/releases/tag/8.0.1-betafpvmatrix) |
+
+Each branch contains:
+
+* **STM32G4 MCU support** (STM32G473xE/G474xE, Cortex-M4F at 168 MHz, 512 KB flash). It follows INAV's
+  H7 port and Betaflight's G4 code. All changes to shared files are guarded by `defined(STM32G4)`, so
+  F4, F7, H7 and AT32 builds are unchanged.
 * **ICM42622P** gyro detection, handled like the ICM42688P.
-* Two new targets for the BETAFPV Matrix 1S Brushless Flight Controller:
+* Two targets for the BETAFPV Matrix 1S Brushless Flight Controller:
 
 | Target | Board | Pinout taken from Betaflight target |
 |---|---|---|
 | `BETAFPVMATRIX_3IN1` | Matrix 1S 3IN1 (HD, no analog OSD) | `BETAFPVG473` |
 | `BETAFPVMATRIX_4IN1` | Matrix 1S 4IN1 (analog OSD) | `BETAFPVG473_V2` |
 
-The two boards have different pinouts: flash the file that matches your board.
+The two boards have different pinouts: flash the file that matches your board. On INAV 8.0.1 a 4IN1
+shipped with the LSM6DSK320X gyro is not detected (no driver in 8.0.1); use 9.1 or 10.0 for those.
 
-Build them like any INAV target:
+## Flashing
+
+Put the board in DFU mode (hold BOOT while plugging in USB, or `bl` in the Betaflight CLI / `dfu` in
+INAV), then flash the `.hex` with INAV Configurator (Firmware Flasher, *Load Firmware [Local]*,
+*Full chip erase* on) or STM32CubeProgrammer. Connect afterwards with the Configurator that matches the
+firmware's INAV version (Configurator 9.1.x only connects to 9.x firmware).
+
+## Building
+
+Needs the Arm GNU toolchain 13.2 (`arm-none-eabi-gcc`), CMake and Ruby:
 
 ```sh
+git clone -b master https://github.com/lydianb79/INAV-BETAFPVMATRIX.git     # or -b inav-9.x / -b inav-8.x
+cd INAV-BETAFPVMATRIX
 mkdir build && cd build
 cmake ..
 make BETAFPVMATRIX_3IN1    # -> inav_<version>_BETAFPVMATRIX_3IN1.hex
 make BETAFPVMATRIX_4IN1    # -> inav_<version>_BETAFPVMATRIX_4IN1.hex
 ```
 
-Flash the `.hex` in DFU mode with INAV Configurator (Firmware Flasher, *Load Firmware [Local]*,
-*Full chip erase* on), or with STM32CubeProgrammer if the Configurator does not handle the G4 DFU device.
+## Adding another G4 flight controller
+
+Drop its target folder into `src/main/target/` and build; INAV picks up every target folder
+automatically. [docs/G4_TARGETS.md](docs/G4_TARGETS.md) explains how to write one from a Betaflight
+`config.h`, using the two Matrix targets as templates.
 
 Pin map, bench-test checklist and known gaps (no USB mass storage, SD card, DroneCAN or INAV
 bootloader on G4 yet) are in [docs/MATRIX1S_STM32G4_PORT.md](docs/MATRIX1S_STM32G4_PORT.md).
