@@ -4,7 +4,7 @@
 
 > **Experimental, not yet tested on hardware.** Bench-test with **propellers removed** before flying.
 
-This tree is upstream INAV 9.1.0 (tag `9.1.0`, `e519b69`) plus:
+This tree is upstream INAV 9.1.0 (tag `9.1.0`, `e519b69b0`) plus:
 
 * **STM32G4 MCU support** (STM32G473/G474, Cortex-M4F at 168 MHz), which upstream INAV does not have.
   It follows INAV's H7 port and Betaflight's G4 code. All changes to shared files are guarded by
@@ -30,6 +30,9 @@ make BETAFPVMATRIX_4IN1    # -> inav_9.1.0_BETAFPVMATRIX_4IN1.hex
 
 Flash the `.hex` in DFU mode with INAV Configurator (Firmware Flasher, *Load Firmware [Local]*,
 *Full chip erase* on), or with STM32CubeProgrammer if the Configurator does not handle the G4 DFU device.
+
+**To add another G4 flight controller**, drop its target folder into `src/main/target/` and build;
+[docs/G4_TARGETS.md](docs/G4_TARGETS.md) explains how to write one from a Betaflight config.
 
 Pin map, bench-test checklist and known gaps (no USB mass storage, SD card, DroneCAN or INAV
 bootloader on G4 yet) are in [docs/MATRIX1S_STM32G4_PORT.md](docs/MATRIX1S_STM32G4_PORT.md).
